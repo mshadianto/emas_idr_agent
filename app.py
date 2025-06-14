@@ -24,7 +24,7 @@ APP_NAME = "RAG Agentic AI - Gold Analysis Pro"
 
 # Configuration
 st.set_page_config(
-    page_title="RAG Agentic AI - Gold Analysis Pro",
+    page_title="RAG Agentic AI - Gold Analysis Pro by MS Hadianto",
     page_icon="🏆",
     layout="wide",
     initial_sidebar_state="expanded"
