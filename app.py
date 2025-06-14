@@ -3299,4 +3299,4 @@ st.markdown("---")
 col1, col2, col3 = st.columns(3)
 with col2:
     st.markdown("**Created by [MS Hadianto - Email: sopian.hadianto@gmail.com]**")
-    st.markdown("© 2024 All Rights Reserved")
+    st.markdown("© 2025 All Rights Reserved")
