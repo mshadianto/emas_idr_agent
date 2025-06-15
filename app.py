@@ -2958,338 +2958,47 @@ def main():
                 else:
                     st.caption("🔴 Basic access only")
 
-if __name__ == "__main__":
-    main()
+# Footer with disclaimer
+    st.markdown("---")
     
-    with tab1:
-        st.header("Market Overview")
-        
-        # Get current data with enhanced metrics
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            with st.spinner("Fetching gold price..."):
-                gold_data = gold_agent.get_real_time_gold_data()
-                change_color = "normal" if gold_data.get('change', 0) == 0 else "inverse" if gold_data.get('change', 0) < 0 else "normal"
-                st.metric(
-                    "Gold Price (USD)", 
-                    f"${gold_data['price_usd']:.2f}",
-                    delta=f"{gold_data.get('change', 0):.2f} ({gold_data.get('change_percent', 0):.2f}%)",
-                    delta_color=change_color
-                )
-                
-                if 'high_24h' in gold_data:
-                    st.caption(f"24h Range: ${gold_data.get('low_24h', 0):.2f} - ${gold_data.get('high_24h', 0):.2f}")
-        
-        with col2:
-            with st.spinner("Fetching exchange rate..."):
-                currency_data = currency_agent.get_real_time_currency_data()
-                change_color = "normal" if currency_data.get('change', 0) == 0 else "inverse" if currency_data.get('change', 0) < 0 else "normal"
-                st.metric(
-                    "USD/IDR Rate", 
-                    f"{currency_data['rate']:.2f}",
-                    delta=f"{currency_data.get('change', 0):.2f} ({currency_data.get('change_percent', 0):.2f}%)",
-                    delta_color=change_color
-                )
-                
-                if 'high_24h' in currency_data:
-                    st.caption(f"24h Range: {currency_data.get('low_24h', 0):.2f} - {currency_data.get('high_24h', 0):.2f}")
-        
-        with col3:
-            # Calculate gold price in IDR
-            gold_price_idr = gold_data['price_usd'] * currency_data['rate']
-            idr_change = 0
-            if 'change_percent' in gold_data and 'change_percent' in currency_data:
-                idr_change = gold_data.get('change_percent', 0) + currency_data.get('change_percent', 0)
-            
-            st.metric(
-                "Gold Price (IDR)", 
-                f"Rp {gold_price_idr:,.0f}",
-                delta=f"{idr_change:.2f}%"
-            )
-            
-            st.caption(f"Data Source: {gold_data.get('source', 'unknown').title()}")
-        
-        # Market Status
-        st.subheader("📈 Market Status")
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            gold_trend = "📈" if gold_data.get('change', 0) > 0 else "📉" if gold_data.get('change', 0) < 0 else "➡️"
-            st.write(f"**Gold Trend:** {gold_trend}")
-        
-        with col2:
-            usd_trend = "💪" if currency_data.get('change', 0) > 0 else "📉" if currency_data.get('change', 0) < 0 else "➡️"
-            st.write(f"**USD Strength:** {usd_trend}")
-        
-        with col3:
-            volume = gold_data.get('volume', 0)
-            volume_str = f"{volume:,.0f}" if volume > 0 else "N/A"
-            st.write(f"**Volume:** {volume_str}")
-        
-        with col4:
-            last_update = datetime.now().strftime("%H:%M:%S")
-            st.write(f"**Last Update:** {last_update}")
-        
-        # Historical data and charts
-        st.subheader("Historical Trends")
-        historical_data = generate_historical_data(days_to_analyze)
-        
-        if historical_data:
-            fig_gold, fig_rate, fig_gold_idr = create_charts(historical_data)
-            
-            st.plotly_chart(fig_gold, use_container_width=True)
-            st.plotly_chart(fig_rate, use_container_width=True)
-            st.plotly_chart(fig_gold_idr, use_container_width=True)
-        else:
-            st.warning("Unable to load historical data. Please check your internet connection.")
+    # Footer content in columns
+    col1, col2, col3 = st.columns([2, 2, 1])
     
-    with tab2:
-        st.header("Agent Analysis")
-        
-        historical_data = generate_historical_data(days_to_analyze)
-        
-        if historical_data:
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.subheader("🥇 Gold Price Analysis")
-                gold_analysis = gold_agent.analyze_gold_trends(historical_data)
-                if 'error' not in gold_analysis:
-                    st.write(f"**Trend:** {gold_analysis['trend'].title()}")
-                    st.write(f"**Volatility:** {gold_analysis['volatility']:.2f}")
-                    st.write(f"**Average Change:** ${gold_analysis['avg_change']:.2f}")
-                    st.write(f"**Price Range:** ${gold_analysis['price_range']['min']:.2f} - ${gold_analysis['price_range']['max']:.2f}")
-                    
-                    # Historical data from Yahoo Finance
-                    hist_gold = gold_agent.get_historical_gold_data(days_to_analyze)
-                    if hist_gold:
-                        st.write(f"**Real Data Points:** {len(hist_gold)}")
-            
-            with col2:
-                st.subheader("💱 Currency Analysis")
-                currency_analysis = currency_agent.analyze_currency_trends(historical_data)
-                if 'error' not in currency_analysis:
-                    st.write(f"**Trend:** USD {currency_analysis['trend'].title()}")
-                    st.write(f"**Volatility:** {currency_analysis['volatility']:.2f}")
-                    st.write(f"**Average Change:** {currency_analysis['avg_change']:.2f}")
-                    st.write(f"**Rate Range:** {currency_analysis['rate_range']['min']:.2f} - {currency_analysis['rate_range']['max']:.2f}")
-                    
-                    # Historical data from Yahoo Finance
-                    hist_currency = currency_agent.get_historical_currency_data(days_to_analyze)
-                    if hist_currency:
-                        st.write(f"**Real Data Points:** {len(hist_currency)}")
-            
-            st.subheader("🔗 Correlation Analysis")
-            correlation_analysis = correlation_agent.analyze_correlation(historical_data)
-            if 'error' not in correlation_analysis:
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.metric(
-                        "Gold (USD) vs USD/IDR Correlation",
-                        f"{correlation_analysis['gold_usd_vs_usdidr_correlation']:.3f}"
-                    )
-                with col2:
-                    st.write(f"**Interpretation:** {correlation_analysis['interpretation']}")
-        else:
-            st.error("No historical data available for analysis.")
+    with col1:
+        st.markdown(f"""
+        ### 🏆 {APP_NAME}
+        **Version:** {APP_VERSION}  
+        **Created by:** {APP_CREATOR}  
+        **Updated:** {datetime.now().strftime('%Y-%m-%d')}
+        """)
     
-    with tab3:
-        st.header("📈 Economic Indicators")
+    with col2:
+        st.markdown("""
+        ### ⚠️ Disclaimer
+        **Investment Risk Notice:** This application provides analytical tools and information for educational purposes only. All investment decisions carry inherent risks, and past performance does not guarantee future results.
         
-        # Market Sentiment
-        st.subheader("🎯 Market Sentiment")
-        sentiment_data = economic_agent.get_market_sentiment()
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            fear_greed = sentiment_data.get('fear_greed_index', 50)
-            st.metric("Fear & Greed Index", fear_greed)
-            st.caption(f"Sentiment: {sentiment_data.get('market_sentiment', 'neutral').replace('_', ' ').title()}")
-        
-        with col2:
-            dxy = sentiment_data.get('dxy_index', 102.5)
-            dxy_change = sentiment_data.get('dxy_change', 0)
-            st.metric("Dollar Index (DXY)", f"{dxy:.2f}", delta=f"{dxy_change:.2f}%")
-            st.caption(f"Dollar: {sentiment_data.get('dollar_strength', 'neutral').title()}")
-        
-        with col3:
-            vix = sentiment_data.get('vix_index', 20.0)
-            st.metric("VIX (Volatility)", f"{vix:.2f}")
-            st.caption(f"Volatility: {sentiment_data.get('market_volatility', 'moderate').title()}")
-        
-        # Commodity Correlations
-        st.subheader("🥈 Commodity Correlations")
-        correlations = economic_agent.get_commodity_correlations()
-        
-        if correlations:
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                gold_silver_corr = correlations.get('gold_silver', 0.8)
-                st.metric("Gold vs Silver", f"{gold_silver_corr:.3f}")
-                st.caption("Historical correlation between gold and silver prices")
-            
-            with col2:
-                gold_oil_corr = correlations.get('gold_oil', 0.3)
-                st.metric("Gold vs Oil", f"{gold_oil_corr:.3f}")
-                st.caption("Historical correlation between gold and crude oil prices")
+        **Data Sources:** Real-time data depends on API availability. Always verify critical information from official sources before making investment decisions.
+        """)
     
-    with tab4:
-        st.header("AI-Powered Insights")
-        
-        # Enhanced Query interface with suggestions
-        st.subheader("💬 Ask the AI")
-        
-        # Query suggestions
-        query_suggestions = [
-            "What's the outlook for gold prices in IDR?",
-            "How does USD strength affect gold prices?",
-            "Should I buy gold now based on current trends?",
-            "What's the correlation between fear index and gold prices?",
-            "How does economic volatility impact gold in Indonesia?"
-        ]
-        
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            user_query = st.text_input(
-                "Ask about gold prices, currency trends, or market analysis:",
-                placeholder="e.g., What's the best time to invest in gold?"
-            )
-        
-        with col2:
-            st.write("**Quick Questions:**")
-            for i, suggestion in enumerate(query_suggestions[:3]):
-                if st.button(f"📝 {suggestion[:30]}...", key=f"suggestion_{i}"):
-                    user_query = suggestion
-        
-        historical_data = generate_historical_data(days_to_analyze)
-        
-        if user_query:
-            with st.spinner("🤖 Generating AI insights..."):
-                insights = ai_agent.generate_insights(user_query, historical_data)
-                st.markdown("### 🎯 AI Analysis")
-                st.markdown(insights)
-        
-        # Enhanced Knowledge base status
-        st.subheader("🧠 Knowledge Base Status")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Documents in Knowledge Base", len(retriever.knowledge_base))
-        
-        with col2:
-            knowledge_types = {}
-            for doc in retriever.knowledge_base:
-                doc_type = doc['metadata'].get('type', 'Unknown')
-                knowledge_types[doc_type] = knowledge_types.get(doc_type, 0) + 1
-            
-            if knowledge_types:
-                st.write("**Knowledge Categories:**")
-                for k_type, count in knowledge_types.items():
-                    st.write(f"• {k_type.replace('_', ' ').title()}: {count}")
-        
-        if retriever.knowledge_base:
-            with st.expander("📚 Recent Knowledge Entries"):
-                recent_knowledge = retriever.knowledge_base[-5:]  # Show last 5 entries
-                for i, doc in enumerate(reversed(recent_knowledge)):
-                    st.write(f"**{i+1}. {doc['metadata'].get('type', 'Unknown').replace('_', ' ').title()}**")
-                    st.write(doc['text'])
-                    st.caption(f"Added: {doc['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}")
-                    st.divider()
+    with col3:
+        st.markdown("""
+        ### 🔗 Quick Links
+        - [Alpha Vantage](https://www.alphavantage.co/)
+        - [OpenRouter](https://openrouter.ai/)
+        - [Fixer.io](https://fixer.io/)
+        - [Finnhub](https://finnhub.io/)
+        """)
     
-    with tab5:
-        st.header("Advanced Analytics")
-        
-        historical_data = generate_historical_data(days_to_analyze)
-        
-        if historical_data:
-            df = pd.DataFrame([
-                {
-                    'Date': data.timestamp,
-                    'Gold_USD': data.gold_price_usd,
-                    'USD_IDR': data.usd_idr_rate,
-                    'Gold_IDR': data.gold_price_idr
-                }
-                for data in historical_data
-            ])
-            
-            # Correlation matrix
-            st.subheader("📊 Correlation Matrix")
-            corr_matrix = df[['Gold_USD', 'USD_IDR', 'Gold_IDR']].corr()
-            fig_corr = px.imshow(
-                corr_matrix,
-                title="Asset Correlation Matrix",
-                color_continuous_scale='RdBu',
-                aspect='auto',
-                text_auto=True
-            )
-            fig_corr.update_layout(height=400)
-            st.plotly_chart(fig_corr, use_container_width=True)
-            
-            # Enhanced Statistical summary
-            st.subheader("📈 Statistical Summary")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.write("**Descriptive Statistics:**")
-                st.dataframe(df[['Gold_USD', 'USD_IDR', 'Gold_IDR']].describe())
-            
-            with col2:
-                st.write("**Performance Metrics:**")
-                
-                # Calculate returns
-                for col in ['Gold_USD', 'USD_IDR', 'Gold_IDR']:
-                    returns = df[col].pct_change().dropna()
-                    volatility = returns.std() * np.sqrt(252)  # Annualized volatility
-                    sharpe_ratio = returns.mean() / returns.std() if returns.std() != 0 else 0
-                    
-                    st.metric(
-                        f"{col.replace('_', ' ')} Volatility (Annual)",
-                        f"{volatility:.2%}"
-                    )
-            
-            # Export enhanced data
-            st.subheader("📁 Export Data")
-            
-            # Add technical indicators
-            df['Gold_MA_7'] = df['Gold_USD'].rolling(window=7).mean()
-            df['Gold_MA_30'] = df['Gold_USD'].rolling(window=30).mean()
-            df['USD_IDR_MA_7'] = df['USD_IDR'].rolling(window=7).mean()
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                csv = df.to_csv(index=False)
-                st.download_button(
-                    label="📊 Download Enhanced CSV",
-                    data=csv,
-                    file_name=f"gold_analysis_enhanced_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-                    mime="text/csv"
-                )
-            
-            with col2:
-                # JSON export with metadata
-                export_data = {
-                    'metadata': {
-                        'generated_at': datetime.now().isoformat(),
-                        'days_analyzed': days_to_analyze,
-                        'data_sources': ['yahoo_finance', 'finnhub', 'metals_live'],
-                        'total_records': len(df)
-                    },
-                    'data': df.to_dict('records')
-                }
-                
-                json_str = json.dumps(export_data, indent=2, default=str)
-                st.download_button(
-                    label="📋 Download JSON",
-                    data=json_str,
-                    file_name=f"gold_analysis_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
-                    mime="application/json"
-                )
-        else:
-            st.error("No data available for advanced analytics.")
+    # Technical info
+    st.markdown("---")
+    st.caption(f"""
+    🔧 **Technical Info:** Running Streamlit {st.__version__} | 
+    📊 **Data Sources:** Alpha Vantage, OpenRouter Qwen3, Fixer.io, Finnhub, Yahoo Finance | 
+    🧠 **AI Engine:** RAG (Retrieval Augmented Generation) with Multi-Agent Architecture | 
+    💾 **Cache Status:** {len(st.session_state) if hasattr(st, 'session_state') else 0} items | 
+    ⏰ **Session:** {datetime.now().strftime('%H:%M:%S')} | 
+    👨‍💻 **Developer:** {APP_CREATOR}
+    """)
 
 if __name__ == "__main__":
     main()
